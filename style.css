@@ -4,8 +4,8 @@
   --card: #64FFF4;
   --accent: #d52bff;
   --accent-2: #64FFF4;
-  --text: #ffe9f7;
-  --muted: #f3a9d3;
+  --text: #d52bff;
+  --muted: #d52bff;
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   --glow: 0 0 30px rgba(255, 122, 184, 0.6);
   --radius: 16px;
@@ -547,3 +547,4 @@ body.dim .background-lights {
     text-align: left;
   }
 }
+
