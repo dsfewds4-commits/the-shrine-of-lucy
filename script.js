@@ -1,242 +1,82 @@
-const cupboardStage = document.getElementById('cupboardStage');
-const cupboard = document.querySelector('.cupboard');
-const door = document.getElementById('cupboardDoor');
-const enterBtn = document.getElementById('enterShrine');
-const shrine = document.getElementById('shrine');
-const backgroundLights = document.querySelector('.background-lights');
-const toggleLights = document.getElementById('toggleLights');
-const toggleMusic = document.getElementById('toggleMusic');
-const audioEl = document.getElementById('shrineAudio');
-const photoGrid = document.getElementById('photoGrid');
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightboxImg');
-const lightboxCaption = document.getElementById('lightboxCaption');
-const closeLightbox = document.getElementById('closeLightbox');
-const noteInput = document.getElementById('noteInput');
-const addNoteBtn = document.getElementById('addNote');
-const noteList = document.getElementById('noteList');
-const timelineEl = document.getElementById('timeline');
-const imageUpload = document.getElementById('imageUpload');
-const uploadBtn = document.getElementById('uploadBtn');
-const passwordInput = document.getElementById('galleryPassword');
-const unlockBtn = document.getElementById('unlockBtn');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucy Shrine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background-lights" aria-hidden="true"></div>
+  <div class="cupboard-stage" id="cupboardStage">
+    <div class="cupboard">
+      <div class="door" id="cupboardDoor">
+        <div class="door-front">
+          <div class="label">Lucy</div>
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="cupboard-shadow"></div>
+    </div>
+    <div class="intro-text">
+      <p>Open the cupboard to enter Lucy's interactive shrine.</p>
+      <button id="enterShrine" class="primary-btn">Open</button>
+    </div>
+  </div>
 
-// Load images from localStorage, start empty if none
-function getImageData() {
-  const stored = localStorage.getItem('lucy-images');
-  if (stored) {
-    return JSON.parse(stored);
-  }
-  return [];
-}
+  <main class="shrine" id="shrine">
+    <section class="panel photo-panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Gallery</p>
+          <h2>Lucy poster wall</h2>
+        </div>
+      </div>
+      <div class="upload-area">
+        <div class="password-box">
+          <label for="galleryPassword">Secret code</label>
+          <input type="password" id="galleryPassword" maxlength="4" placeholder="••••" />
+          <button class="secondary-btn tiny" id="unlockBtn">Unlock</button>
+        </div>
+        <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+        <button class="secondary-btn locked" id="uploadBtn" disabled>📷 Add posters</button>
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
+    </section>
 
-let imageData = getImageData();
-let uploadUnlocked = sessionStorage.getItem('lucy-upload-unlocked') === 'true';
+    <section class="panel memory-panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Notes</p>
+          <h2>Pin a note for Lucy</h2>
+        </div>
+        <p class="hint">Notes save locally in your browser.</p>
+      </div>
+      <div class="notes">
+        <textarea id="noteInput" placeholder="Drop a kind word, a memory, or an inside joke..."></textarea>
+        <button class="primary-btn" id="addNote">Pin note</button>
+      </div>
+      <div class="note-list" id="noteList"></div>
+    </section>
+  </main>
 
-const timelineData = [
-  { year: 'Today', text: 'Building this shrine to celebrate Lucy.' },
-  { year: 'Memory', text: 'The yellow emoji costume takeover.' },
-  { year: 'Memory', text: 'Outside bench chats with sun and breeze.' }
-];
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+      <button class="close" id="closeLightbox" aria-label="Close lightbox">&times;</button>
+      <img id="lightboxImg" alt="Lucy close up" />
+      <p id="lightboxCaption"></p>
+    </div>
+  </div>
 
-function openShrine() {
-  cupboard.classList.add('open');
-  setTimeout(() => {
-    shrine.classList.add('visible');
-    window.scrollTo({ top: cupboardStage.offsetHeight, behavior: 'smooth' });
-  }, 600);
-}
+  <audio id="shrineAudio" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2023/03/06/audio_7c7074e5a6.mp3?filename=lullaby-139752.mp3" type="audio/mpeg">
+  </audio>
 
-enterBtn.addEventListener('click', openShrine);
-door.addEventListener('click', openShrine);
+  <footer class="credit">made by loki</footer>
 
-toggleLights.addEventListener('click', () => {
-  document.body.classList.toggle('dim');
-});
-
-toggleMusic.addEventListener('click', () => {
-  if (audioEl.paused) {
-    audioEl.volume = 0.4;
-    audioEl.play().catch(() => {});
-  } else {
-    audioEl.pause();
-  }
-});
-
-function createImageCard({ src, caption }) {
-  const card = document.createElement('div');
-  card.className = 'photo-card';
-
-  const img = document.createElement('img');
-  img.src = src;
-  img.alt = caption;
-  img.onerror = () => img.replaceWith(createPlaceholder(caption));
-
-  const cap = document.createElement('div');
-  cap.className = 'caption';
-  cap.textContent = caption;
-
-  card.appendChild(img);
-  card.appendChild(cap);
-
-  card.addEventListener('click', () => openLightbox(src, caption));
-  return card;
-}
-
-function createPlaceholder(caption) {
-  const placeholder = document.createElement('div');
-  placeholder.className = 'placeholder';
-  placeholder.textContent = caption || 'No posters yet – unlock the shrine to start pinning Lucy pics.';
-  return placeholder;
-}
-
-function renderGallery() {
-  photoGrid.innerHTML = '';
-  if (!imageData.length) {
-    const empty = document.createElement('div');
-    empty.className = 'photo-card';
-    empty.appendChild(createPlaceholder('No Lucy photos yet. Enter the secret code to start the wall of fame.'));
-    photoGrid.appendChild(empty);
-    return;
-  }
-  imageData.forEach((img) => {
-    const card = createImageCard(img);
-    photoGrid.appendChild(card);
-  });
-}
-
-// Save images to localStorage
-function saveImageData(data) {
-  localStorage.setItem('lucy-images', JSON.stringify(data));
-}
-
-function openLightbox(src, caption) {
-  lightboxImg.src = src;
-  lightboxCaption.textContent = caption;
-  lightbox.classList.add('open');
-}
-
-closeLightbox.addEventListener('click', () => lightbox.classList.remove('open'));
-lightbox.addEventListener('click', (e) => {
-  if (e.target === lightbox) lightbox.classList.remove('open');
-});
-
-function loadNotes() {
-  const stored = localStorage.getItem('lucy-notes');
-  return stored ? JSON.parse(stored) : [];
-}
-
-function saveNotes(notes) {
-  localStorage.setItem('lucy-notes', JSON.stringify(notes));
-}
-
-function renderNotes() {
-  noteList.innerHTML = '';
-  const notes = loadNotes();
-  notes.forEach((note) => {
-    const el = document.createElement('div');
-    el.className = 'note';
-    el.innerHTML = `
-      <div>${note.text}</div>
-      <div class="time">${note.time}</div>
-    `;
-    noteList.appendChild(el);
-  });
-}
-
-addNoteBtn.addEventListener('click', () => {
-  const text = noteInput.value.trim();
-  if (!text) return;
-  const notes = loadNotes();
-  const stamp = new Date().toLocaleString();
-  notes.unshift({ text, time: stamp });
-  saveNotes(notes);
-  renderNotes();
-  noteInput.value = '';
-});
-
-function renderTimeline() {
-  timelineData.forEach((item) => {
-    const el = document.createElement('div');
-    el.className = 'timeline-item';
-    el.dataset.year = item.year;
-    el.textContent = item.text;
-    timelineEl.appendChild(el);
-  });
-}
-
-// Password gate for uploads
-function updateUploadLockUI() {
-  if (uploadUnlocked) {
-    uploadBtn.disabled = false;
-    uploadBtn.classList.remove('locked');
-    if (unlockBtn) {
-      unlockBtn.textContent = 'Code accepted';
-      unlockBtn.disabled = true;
-    }
-    if (passwordInput) {
-      passwordInput.value = '';
-      passwordInput.disabled = true;
-    }
-  } else {
-    uploadBtn.disabled = true;
-    uploadBtn.classList.add('locked');
-  }
-}
-
-if (unlockBtn && passwordInput) {
-  unlockBtn.addEventListener('click', () => {
-    if (passwordInput.value === '6262') {
-      uploadUnlocked = true;
-      sessionStorage.setItem('lucy-upload-unlocked', 'true');
-      updateUploadLockUI();
-    } else {
-      unlockBtn.classList.add('shake');
-      setTimeout(() => unlockBtn.classList.remove('shake'), 400);
-    }
-  });
-}
-
-// Image upload handler (only when unlocked)
-uploadBtn.addEventListener('click', () => {
-  if (!uploadUnlocked) return;
-  imageUpload.click();
-});
-
-imageUpload.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files);
-  files.forEach((file) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const newImage = {
-        src: event.target.result,
-        caption: file.name.replace(/\.[^/.]+$/, '') || 'Lucy photo'
-      };
-      imageData.push(newImage);
-      saveImageData(imageData);
-      renderGallery();
-      updateHeroImage();
-    };
-    reader.readAsDataURL(file);
-  });
-  // Reset input so same file can be selected again
-  imageUpload.value = '';
-});
-
-// Update hero image
-function updateHeroImage() {
-  const heroImg = document.getElementById('heroImage');
-  if (imageData.length > 0) {
-    heroImg.src = imageData[0].src;
-  } else {
-    heroImg.removeAttribute('src');
-    heroImg.classList.add('no-photo');
-  }
-}
-
-// kick off
-updateUploadLockUI();
-updateHeroImage();
-renderGallery();
-renderNotes();
-renderTimeline();
+  <script src="script.js"></script>
+</body>
+</html>
