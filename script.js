@@ -154,7 +154,7 @@ function updateUploadLockUI() {
 
 if (unlockBtn && passwordInput) {
   unlockBtn.addEventListener('click', () => {
-    if (passwordInput.value === '6262') {
+    if (passwordInput.value === '1262') {
       uploadUnlocked = true;
       sessionStorage.setItem('lucy-upload-unlocked', 'true');
       updateUploadLockUI();
