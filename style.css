@@ -1,11 +1,11 @@
 :root {
-  --bg: #64FFF4;
-  --panel: #d52bff;
-  --card: #64FFF4;
-  --accent: #d52bff;
-  --accent-2: #64FFF4;
-  --text: #d52bff;
-  --muted: #d52bff;
+  --bg: #120616;
+  --panel: #1a0b24;
+  --card: #24112f;
+  --accent: #ff7ab8;
+  --accent-2: #ffc94f;
+  --text: #ffe9f7;
+  --muted: #f3a9d3;
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   --glow: 0 0 30px rgba(255, 122, 184, 0.6);
   --radius: 16px;
@@ -547,4 +547,5 @@ body.dim .background-lights {
     text-align: left;
   }
 }
+
 
